@@ -22,7 +22,7 @@ variance = np.sum((data-mean)*(data-mean), axis=1).reshape(data.shape[0], 1) / d
 standard_deviation = np.sqrt(variance)
 #generate covariance matrix from outer product of data, XX^T
 data_centered= (data-mean)/standard_deviation
-covariance_mat = data_centered@ data.transpose()
+covariance_mat = data_centered@ data_centered.transpose()
 eigenvalues, eigenvectors = np.linalg.eig(covariance_mat)
 #sort eigens in descending order of e value
 indices = np.argsort(eigenvalues)[eigenvalues.shape[0]::-1]
