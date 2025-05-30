@@ -12,9 +12,10 @@ test_output = test_data[:,2].reshape(1,-1) # shape is 1,number of datapoints
 # X:- (n,m) m datapoints, n features
 # w:- (n,1) weights
 #y:- (1,m) outputs
-def logistic_regression(X,y,w_initial=np.array([[0],[0],[0.1],[0],[0]]),b_initial=0,learning_rate=0.0001, max_iters=1000):
+def logistic_regression(X,y,w=0,b_initial=0,learning_rate=0.0001, max_iters=5000):
     (n,m) = X.shape
-    w=w_initial
+    if w==0:
+        w=np.zeros((n,1))
     b=b_initial
     
     for iter in range(max_iters):
