@@ -15,7 +15,7 @@ map_func = np.vectorize(color_dict.get)
 #train_output_num = map_func(train_output).reshape(1,-1)
 
 
-def logistic_regression(X,y,w=0,b_initial=0,learning_rate=0.5, max_iters=3000):
+def logistic_regression(X,y,w=0,b_initial=0,learning_rate=0.6, max_iters=1000):
     (n,m) = X.shape
     if w==0:
         w=np.zeros((n,1))
@@ -54,8 +54,6 @@ b_list = []
 for i,color in enumerate(unique):
     y= (train_output==color).astype(float).reshape(1,-1)
     w_colori,b_colori =logistic_regression(train_input,y)
-    print(train_input.shape)
-    print(y.shape)
     w_colori= w_colori.reshape(-1,1)
     w_list.append(w_colori)
     b_list.append(b_colori)
@@ -81,7 +79,7 @@ percent_correct = np.mean(test_output==prediction)
 
 print(f'Distribution of data points')
 print(frequency)
-print(f'Percentage classified correctly :- {percent_correct:.2%}')
+print(f'Percentage classified correctly(argmax):- {percent_correct:.2%}')
 
 
 #VISUALISER
@@ -95,9 +93,14 @@ y_min, y_max = test_input[1].min()-1, test_input[1].max()+1
 for i,color in enumerate(unique):
     #get y points o decision boundary, ST z = w_list[i].T@test_input +b_list[i] = 0
     X = np.linspace(x_min,x_max,200)
-    Y = -(w_list[i][0]*X +b_list[i]) / w_list[i][1]
-    Y=Y.ravel()
-    plt.plot(X,Y, c=color)
+    if w_list[i][1] != 0:
+        Y = -(w_list[i][0]*X +b_list[i]) / w_list[i][1]
+        Y=Y.ravel()
+        plt.plot(X,Y, c=color, label=f"Class {i}")
+    else:
+        #vertical x=x_val line
+        x_val = b_list[i]/w_list[i][1]
+        plt.axvline(x=x_val, color=color, linestyle='--', label=f"Class {i} (vert)")
 plt.show()
 
 
