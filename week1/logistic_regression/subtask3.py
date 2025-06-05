@@ -1,4 +1,5 @@
 import numpy as np
+np.set_printoptions(precision=2,floatmode='unique')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -8,11 +9,6 @@ train_input = np.column_stack((train_data['x'],train_data['y'])).T.reshape(2,-1)
 train_output = np.column_stack((train_data['color'],train_data['marker']))
 
 
-# X:- (n,m) m datapoints, n features
-# y:- (1,m) outputs
-# w:- (n,1) initial weights
-# b:- (1,1)
-
 #make it handle not just binary but multi class classification
 # y^ needs to be a multi class precdiction :- {red, green, blue} = {0.5,0.25.0.25}
 #CONVENTION FOR AXES -> (#dimensions of space(output or input), #datapoints)
@@ -20,66 +16,56 @@ train_output = np.column_stack((train_data['color'],train_data['marker']))
 # y:- (#classes , #datapoints) or (c,m) NOTE:- for yes/no means that classes are 0 and 1. Expected NOTA option as the last class
 # b now is (c,1)
 # w is now (c,n) cuz w shud be a transformation matrix from n dimnesions to output c dimensions
-def logistic_regression(X,y, w=0,b_initial=0,learning_rate=0.035, max_iters=100):
+def logistic_regression(X,Y, w=0,b_initial=0,learning_rate=0.001,max_iters=20, lambda_ = 0):
     (n,m) = X.shape
-    if y.shape[1]== X.shape[1]:
-        (c,m) = y.shape
+    if Y.shape[1]== X.shape[1]:
+        (c,m) = Y.shape
     else:
         raise ValueError(f"Expected X.shape=(#features,#datapoints) and Y.shape=(#classes,#datapoints), got {X.shape} and{Y.shape}")
     if w==0:
-        w=np.zeros((c,n))
+        w=np.random.rand(c,n,)*0.01
     if b_initial==0:
-        b=np.zeros((c,1))
-    
+        b=np.random.rand(c,1)*0
+    if lambda_==0:
+        lambda_ = learning_rate/10
     for iter in range(max_iters):
-        z = w@X +b
-        yPredicted= 1/(1+np.exp(-z))
-        #calculate gradient of cost/average suprise 
-        # dw =  ((2*(yPredicted - y) * X).sum(axis=1) / m ).reshape(-1,1)
-        # db = ((2*(yPredicted - y)).sum(axis=1) / m).reshape(-1,1)
         dw = np.zeros(w.shape)
         db=0
 
         Z= w@X+b
-        Sigmoid = 1/(1+np.exp(-z))  
+        Sigmoid = 1/(1+np.exp(-Z)) +1e-15
+        sum_cols = Sigmoid.sum(axis=0,keepdims=1)
+        Probabilities = Sigmoid/sum_cols
+        Loss = -np.log(Probabilities+1e-15) * Y
+        cost = 1/m * Loss.sum() 
+        dLoss_dw = np.zeros(w.shape)
+        dLoss_db = np.zeros(b.shape)
         for i in range(m):
-            #X_i = X[:,i].reshape(X.shape[0],-1)
-            y_i = y[:,i].reshape(y.shape[0],-1)
-            #z = w@X_i +b 
-            z = Z[:,i].reshape(Z.shape[0],-1) #(c,1)
-            sigmoid = Sigmoid[:,i].reshape(Sigmoid.shape[0],-1)     #(c,1)    
-            sum_sigmoid = sigmoid.sum()  
-            #loss/suprise is sum(y[i] * ln(1/probability of class i)) for a training example
-            #prob of class i is sigmoid / sigmoid.sum()
+            X_i = X[:,i].reshape(-1,1)
+            y_i = Y[:,i].reshape(-1,1)
+            z = Z[:,i].reshape(-1,1) #(c,1)
+            a = Sigmoid[:,i].reshape(Sigmoid.shape[0],-1)     #(c,1)    
+            probabilities = Probabilities[:,i].reshape(-1,1)
+            sum_cols_i = sum_cols[0][i]
 
-            dLoss_dz = (y_i *(1/sum_sigmoid-1/sigmoid)) * sigmoid*(1-sigmoid)  # (c,1)  gives the d(loss of ith training example)/dz
-            dw+= dLoss_dz * X.T[i]   # (c,1) * (1,n) = (c,n) broadcasting gives the d(loss of ith training example)/dw in w.shape form
-            db += dLoss_dz
-        dw/=m
-        db/=m
+            #index of crct answer/one hot encoding
+            idx = np.argmax(y_i)
+            dLoss_dw +=  -1/probabilities[idx]*((sum_cols_i*y_i-a)/sum_cols_i**2).T @ (a*(1-a) @ X_i.T)  # (c,1)  gives the d(loss of ith training example)/dz
+            dLoss_db +=  -1/probabilities[idx]*((sum_cols_i*y_i-a)/sum_cols_i**2).T @ (a*(1-a))  # (c,1)  gives the d(loss of ith training example)/dz
 
+        dCost_dw = dLoss_dw/m
+        dCost_dw += (2 * lambda_ / m) * w
+        dCost_db = dLoss_db/m
+        print(f"dw = {learning_rate*dCost_dw[0]}, db = {learning_rate*dCost_db[0]}")
         #grad step
-        w -= learning_rate*dw
-        b -= learning_rate*db
+        w -= learning_rate*dCost_dw
+        b -= learning_rate*dCost_db
+        print(w[0])
+        print(b[0])
 
-
-        if iter%int(max_iters/5)==0:
-            cost =0
-            Z= w@X+b
-            Sigmoid = 1/(1+np.exp(-Z))  
-
-            for i in range(m):
-                y_i = y[:,i].reshape(y.shape[0],-1)
-                #z = w@X_i +b 
-                z = Z[:,i].reshape(Z.shape[0],-1) #
-                sigmoid = Sigmoid[:,i].reshape(Sigmoid.shape[0],-1)
-                sum_sigmoid = sigmoid.sum()  
-                cost += np.mean(y_i * (-np.log(sigmoid/sum_sigmoid)))
-            cost /= m
-
-
-            print(cost)
-    #print(w)
+        if iter%int(max_iters/10)==0 or 1:
+            regul_cost = lambda_/m*(w**2).sum()
+            print(f"{cost+regul_cost:} = {cost:} + {regul_cost:}")
     return w,b
 
 #PRE PROCESS DATA
@@ -97,7 +83,11 @@ for i,class_  in enumerate(unique):
     one_hot_encoding[class_] = arr
 
 #print(train_output)
-y = np.array([one_hot_encoding[class_] for class_ in train_output]).T
+y = np.array([one_hot_encoding[class_] for class_ in train_output]).reshape(len(unique),-1)
+
+mean =train_input.mean(axis=1,keepdims=1)
+std_dev = ((train_input -mean)**2).mean(axis=1, keepdims=1)
+train_input = (train_input-mean)/std_dev
 
 w,b =logistic_regression(train_input,y) #returns (c,n), (c,1)
 
@@ -113,34 +103,58 @@ test_output = [tuple(row) for row in test_output]
 
 #predict
 X=test_input
+mean =X.mean(axis=1,keepdims=1)
+std_dev = ((X -mean)**2).mean(axis=1,keepdims=1)
+X = (X-mean)/std_dev
+
 y= test_output
 z = w@X +b
 y_probability_distri = 1/(1+np.exp(-z))
-y_probability_distri /= y_probability_distri.sum(axis=0)
+y_probability_distri /= y_probability_distri.sum(axis=0,keepdims=1)
 
-prediction = np.array([np.argmax(y_probability_distri[:,i]) for i in range(test_input.shape[1])])
+prediction = np.array( [np.argmax(y_probability_distri[:,i]) for i in range(test_input.shape[1])] )
 prediction = [tuple(unique[arg]) for i,arg in enumerate(prediction)]
 #make into list of tuples
 
+# print(prediction)
+# print(test_output)
 percent_correct = np.mean([x == y for x, y in zip(prediction, test_output)])
 print(f'Percentage classified correctly :- {percent_correct:.2%}')
 
+# percent_correct_dict = {}
+# for i,color_marker in enumerate(unique):
+#     prediction_i = prediction==unique[i]
+#     test_output_i = test_output==unique[i]
+#     percent_correct_i = np.sum(prediction_i==test_output_i)/ np.sum(test_output_i)
+#     percent_correct_dict[unique[i]] = f"{percent_correct_i:.2f}"
+# print(f'Percentage classified correctly per color:- {percent_correct_dict:.2%}')
 
-# #VISUALISER
-# #Plot actual points
-# plt.scatter(test_input[0],test_input[1], c=test_output, cmap='bwr', edgecolors='b', s=50)
+
+#VISUALISER
+#Plot actual points
+color_marker = np.array(test_output)
+colors =color_marker[:,0]
+markers = color_marker[:,1]
+
+for marker in np.unique(markers):
+    idx = markers == marker
+    plt.scatter(X[0][idx],X[1][idx], c=colors[idx], marker=marker, label=f"Marker {marker}")
 
 
-# #decision boundaries of each color
-# x_min, x_max = test_input[0].min()-1, test_input[0].max()+1
-# y_min, y_max = test_input[1].min()-1, test_input[1].max()+1
-# for i,color in enumerate(unique):
-#     #get y points o decision boundary, ST z = w_list[i].T@test_input +b_list[i] = 0
-#     X = np.linspace(x_min,x_max,200)
-#     Y = -(w_list[i][0]*X +b_list[i]) / w_list[i][1]
-#     Y=Y.ravel()
-#     plt.plot(X,Y, c=color)
-# plt.show()
+#decision boundaries of each color
+x_min, x_max = X[0].min()-1, X[0].max()+1
+y_min, y_max = X[1].min()-1, X[1].max()+1
+for i,color_marker in enumerate(unique):
+    color_marker=np.array(color_marker)
+    print(color_marker)
+    color =color_marker[0]
+    marker = color_marker[1]
+    #get y points o decision boundary, ST z = w_list[i].T@test_input +b_list[i] = 0
+    X = np.linspace(x_min,x_max,200)
+    Y = -(w[i][0]*X +b[i]) / w[i][1]
+    Y=Y.ravel()
+    plt.scatter(X,Y, c=color, marker=marker)
+plt.show()
 
 
 
