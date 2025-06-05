@@ -8,19 +8,20 @@ import matplotlib.patches as mpatches
 # y:- (c,m) or (#classes , #datapoints)  NOTE:- for yes/no means that classes are 0 and 1. Expected NOTA option as the last class
 # b:- (c,1)
 # w:- (c,n) cuz w shud be a transformation matrix from n dimnesions to output c dimensions
-def logistic_regression(X,Y, w=0,b_initial=0,learning_rate=9e0,max_iters=100, lambda_ = 0):
+def logistic_regression(X,Y, w=None,b_initial=None,learning_rate=9e0,max_iters=100, lambda_ = 0):
     (n,m) = X.shape
     if Y.shape[1]== X.shape[1]:
         (c,m) = Y.shape
     else:
         raise ValueError(f"Expected X.shape=(#features,#datapoints) and Y.shape=(#classes,#datapoints), got {X.shape} and{Y.shape}")
-    if w==0:
+    if w==None:
         w=np.random.rand(c,n,)*10
-    if b_initial==0:
+    if b_initial==None:
         b=np.random.rand(c,1)*0
-    if lambda_==0:
+    if lambda_==None:
         lambda_ = learning_rate/20
     
+    #Gradien descent
     for iter in range(max_iters):
         #forward prop
         Z= w@X+b #(c.m)
@@ -37,34 +38,35 @@ def logistic_regression(X,Y, w=0,b_initial=0,learning_rate=9e0,max_iters=100, la
             probabilities = Probabilities[:,i].reshape(-1,1)
             #sum_cols_i = sum_cols[0][i]
 
-            dLoss_dw +=  ((probabilities-y) @ x.T)   # (c,1)  gives the d(loss of ith training example)/dz
+            dLoss_dw +=  ((probabilities-y) @ x.T)   # (c,n)  gives the d(loss of ith training example)/dz
             dLoss_db +=  ((probabilities-y) ) # (c,1)  gives the d(loss of ith training example)/dz
 
         dCost_dw = dLoss_dw/m
         #add l2 regularization cost
         dCost_dw += (2 * lambda_ / m) * w
         dCost_db = dLoss_db/m
-        #grad step
+        #step
         w -= learning_rate*dCost_dw
         b -= learning_rate*dCost_db
  
-
+        #print cost and other things
         if iter%int(max_iters/10)==0 or 1:
-            print(f"dw = {-learning_rate*dCost_dw[0]}, db = {-learning_rate*dCost_db[0]}")
-            print(f'w[0] = {w[0]}, b[0] = {b[0]}')
+            print(f"dw = {-learning_rate*dCost_dw[0]},\n db = {-learning_rate*dCost_db[0]}")
+            print(f'w[0] = {w[0]},\n b[0] = {b[0]}')
 
             Loss = -np.log(Probabilities+1e-100) * Y    #(c,m)
             cost = 1/m * Loss.sum() 
             regul_cost = lambda_/m*(w**2).sum()
+            print("Total Cost = Entropy Cost + regulariztion cost")
             print(f"{cost+regul_cost:} = {cost:} + {regul_cost:}")
 
             argmaxed_predicted = np.argmax(Probabilities,axis=0)
-            print(argmaxed_predicted)
+            # print(argmaxed_predicted[:10])
             # predicted = np.zeros_like(Probabilities)
             # predicted[argmaxed, np.arange(Probabilities.shape[1])] = 1
             # print(predicted)
             argmaxed_actual = np.argmax(train_output,axis = 0)
-            print(argmaxed_actual)
+            # print(argmaxed_actual[:10])
 
 
             percent_correct = np.mean(argmaxed_predicted == argmaxed_actual)

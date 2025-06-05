@@ -9,29 +9,25 @@ train_input = np.column_stack((train_data['x'],train_data['y'])).T.reshape(2,-1)
 train_output = np.column_stack((train_data['color'],train_data['marker']))
 
 
-#make it handle not just binary but multi class classification
-# y^ needs to be a multi class precdiction :- {red, green, blue} = {0.5,0.25.0.25}
 #CONVENTION FOR AXES -> (#dimensions of space(output or input), #datapoints)
-# 0.5 comes from w_red*X+b_red etc
-# y:- (#classes , #datapoints) or (c,m) NOTE:- for yes/no means that classes are 0 and 1. Expected NOTA option as the last class
-# b now is (c,1)
-# w is now (c,n) cuz w shud be a transformation matrix from n dimnesions to output c dimensions
-def logistic_regression(X,Y, w=0,b_initial=0,learning_rate=0.001,max_iters=20, lambda_ = 0):
+
+# y:-(c,m)  (#classes , #datapoints) NOTE:- for yes/no means that classes are 0 and 1. Expected NOTA option as the last class
+# b:-(c,1)
+# w:-(c,n) cuz w shud be a transformation matrix from n dimnesions to output c dimensions
+def logistic_regression(X,Y, w=None,b_initial=None,learning_rate=0.001,max_iters=20, lambda_ = 0):
     (n,m) = X.shape
     if Y.shape[1]== X.shape[1]:
         (c,m) = Y.shape
     else:
         raise ValueError(f"Expected X.shape=(#features,#datapoints) and Y.shape=(#classes,#datapoints), got {X.shape} and{Y.shape}")
-    if w==0:
+    if w==None:
         w=np.random.rand(c,n,)*0.01
-    if b_initial==0:
+    if b_initial==None:
         b=np.random.rand(c,1)*0
     if lambda_==0:
         lambda_ = learning_rate/10
-    for iter in range(max_iters):
-        dw = np.zeros(w.shape)
-        db=0
 
+    for iter in range(max_iters):
         Z= w@X+b
         Sigmoid = 1/(1+np.exp(-Z)) +1e-15
         sum_cols = Sigmoid.sum(axis=0,keepdims=1)
