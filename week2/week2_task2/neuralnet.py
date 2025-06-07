@@ -9,6 +9,7 @@ What you need to do:
 - Implement NN methods
 
 """
+lambda_ = 0.1
 
 import numpy as np
 import argparse
@@ -92,7 +93,7 @@ def shuffle(X, y, epoch):
     np.random.seed(epoch)
     N = len(y)
     ordering = np.random.permutation(N)
-    return X[ordering], y[ordering]
+    return X[:,ordering], y[:,ordering]
 
 
 def zero_init(shape):
@@ -122,7 +123,7 @@ def random_init(shape):
     # TODO: create the random matrix here!
     # Hint: numpy might have some useful function for this
     # Hint: make sure you have the right distribution
-    return np.random.rand(M,D)
+    return np.random.normal(loc=0,scale=2/D, size=(M,D))
 
 
 class SoftMaxCrossEntropy:
@@ -255,7 +256,8 @@ class Linear:
         # TODO: set the bias terms to zero
         self.b = np.zeros((output_size,1))
         # TODO: Initialize matrix to store gradient with respect to weights
-        self.dw = weight_init_fn(self.w.shape)
+        self.dw = np.zeros_like(self.w.shape)
+        self.db = np.zeros_like(self.b.shape)
 
         # TODO: Initialize any additional values you may need to store for the
         #  backward pass here
@@ -298,6 +300,7 @@ class Linear:
         """
         # TODO: implement
         self.dw = dz.reshape(-1,1) @ self.x.T  #(ouput_size,1) @ (1,input_size)
+        self.db = dz.reshape(-1,1)
         dx = (self.w.T @ dz)    # (input_size, output_size) @ (output_size,1) 
         return dx
 
@@ -308,6 +311,7 @@ class Linear:
         """
         # TODO: implement
         self.w -= self.lr * self.dw
+        self.b -= self.lr * self.db
 
 
 class NN:
@@ -415,9 +419,10 @@ class NN:
         :param X_test: train data, shape (input_size,num_points)
         :param y_test: train label. shape (1,num_points)
         :param n_epochs: number of epochs to train for
-        :return \
-            train_losses: Training losses *after* each training epoch, (n_epoch,)
-            test_losses: Test losses *after* each training epoch, (n_epoch,)
+        :return train_losses: Training losses *after* each training epoch, (n_epoch,)            
+        :return test_losses: Test losses *after* each training epoch, (n_epoch,)
+        :return train_accuracy:
+        :return test_accuracy:
         """
         # TODO: train network
         (n,m) = X_tr.shape
@@ -427,10 +432,13 @@ class NN:
 
         train_losses = np.zeros(n_epochs)
         test_losses = np.zeros(n_epochs)
+        train_accuracy = np.zeros(n_epochs)
+        test_accuracy = np.zeros(n_epochs)
 
         test_loss_min = 1e10
         for epoch in range(n_epochs):
-            print(f"\n epoch = {epoch}")
+            # print(f"\n epoch = {epoch}")
+            shuffle(X_tr,y_tr,epoch)
             for i in range(m):
                 (y_hat,_) = self.forward(X_tr[:,i:i+1],y_tr[0][i])
                 self.backward(y_tr[0][i],y_hat)
@@ -441,20 +449,23 @@ class NN:
 
             train_losses[epoch] = train_loss_epoch
             test_losses[epoch] = test_loss_epoch
+            _,train_accuracy[epoch] = self.test(X_tr,y_tr)
+            _,test_accuracy[epoch] = self.test(X_test,y_test)
+            (train_accuracy[epoch],test_accuracy[epoch]) = (1-train_accuracy[epoch],1-test_accuracy[epoch])
 
-            if test_loss_min > test_loss_epoch:
-                print(f"new test loss min = {test_loss_epoch}")
-            test_loss_min = np.minimum(test_loss_min,test_loss_epoch)
+            # if test_loss_min > test_loss_epoch:
+            #     print(f"new test loss min = {test_loss_epoch}")
+            # test_loss_min = np.minimum(test_loss_min,test_loss_epoch)
 
-            average_over_what = int(5/(args.learning_rate / 0.3))*0 + 20
-            if epoch>average_over_what:
-                print(f"last 5 test loss {np.mean(test_losses[epoch-average_over_what+1:epoch+1])}")
+            # average_over_what = int(5/(args.learning_rate / 0.3))*0 + 20
+            # if epoch>average_over_what:
+            #     print(f"last 5 test loss {np.mean(test_losses[epoch-average_over_what+1:epoch+1])}")
 
-            if epoch>100 and np.mean(test_losses[epoch-average_over_what+1:epoch+1]) > test_loss_min+0.2:
-                print(np.mean(test_losses[epoch-average_over_what:epoch+1]))
-                print("AAAAAAAAAAAAA ABORT")
-                #break
-        return (train_losses,test_losses)
+            # if epoch>100 and np.mean(test_losses[epoch-average_over_what+1:epoch+1]) > test_loss_min+0.2:
+            #     print(np.mean(test_losses[epoch-average_over_what:epoch+1]))
+            #     print("AAAAAAAAAAAAA ABORT")
+            #     #break
+        return (train_losses,test_losses,train_accuracy,test_accuracy)
             
 
 
@@ -511,12 +522,28 @@ if __name__ == "__main__":
 
     # train model
     # (this line of code is already written for you)
-    train_losses, test_losses = nn.train(X_tr, y_tr, X_test, y_test, n_epochs)
+    train_losses, test_losses, train_accuracy, test_accuracy= nn.train(X_tr, y_tr, X_test, y_test, n_epochs)
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 6))
+    time = np.arange(n_epochs)
+    plt.plot(time, train_losses, label='train_losses(t)')
+    plt.plot(time, test_losses, label='test_losses(t)')
+    plt.plot(time, train_accuracy*100, label='train_accuracy')
+    plt.plot(time, test_accuracy*100, label='test_accuracy')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.title('Multiple Time Series')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
     # test model and get predicted labels and errors 
     # (this line of code is written for you)
     train_labels, train_error_rate = nn.test(X_tr, y_tr)
     test_labels, test_error_rate = nn.test(X_test, y_test)
+    print(f"indices of wrong train labels = { np.where(train_labels != y_tr)[1]}")
+    print(f"indices of wrong test labels = { np.where(test_labels != y_test)[1]}")
 
     # Write predicted label and error into file
     # Note that this assumes train_losses and test_losses are lists of floats
