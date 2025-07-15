@@ -22,7 +22,7 @@ The model was trained for 30 epochs.
 Batch size was 64 with 80% of dataset used for training.  
   
 ### Key training metrics  
-[Train loss and accuracy](test1.png)  
+[Train loss and accuracy](images/test1.png)  
   
 The model is saved in `week5/models` as `trained_model.pth` with only the state_dict instead of the entire model.  
   
@@ -60,4 +60,4 @@ IMAGE-PATH is required for model to predict the PokéMon
 To predict the PokéMon by uploading image using an interface, run  
 `python app.py`  
 This will provide a local as well as an online link to the interface website. Simply upload the image and click Submit.  
-![Gradio Interface](gradio_demo.png)
+![Gradio Interface](images/gradio_demo.png)
