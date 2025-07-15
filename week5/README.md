@@ -1,4 +1,4 @@
-# "Week 5: Pokémon Image Classifier"
+### "Week 5: Pokémon Image Classifier"
 
 # Introduction: Briefly describe the project goal and what's implemented.
 The goal of this project was to train a model which can classify 1st generation PokéMon.
@@ -20,29 +20,28 @@ Loss Function used is CrossEntropyLoss and Optimizer used is Adam.
 The model was trained for 30 epochs.
 Batch size was 64 with 80% of dataset used for training.
 
-# Key training metrics (e.g., training loss, validation accuracy). It would be great to include plots of training curves (loss vs. epochs, accuracy vs. epochs).
+# Key training metrics
+[Train loss and accuracy](test1.png)
 
-The model is saved in week5/models as trained_model.pth with only the state_dict instead of the entire model.
+The model is saved in `week5/models` as `trained_model.pth` with only the state_dict instead of the entire model.
 
 # Results:
-Report the final test accuracy.
-Discuss any challenges faced and how you addressed them.
-(Optional) Confusion matrix or classification report.
-# Gradio Frontend: Describe how to run the Gradio application and what features it provides. Include a screenshot or GIF of your running application.
-Run app.py using 
-'python app.py'
+(to be updated)
+# Gradio Frontend:
+Run app.py(gradio interface) using 
+`python app.py`
 
-# How to Run: Step-by-step instructions on how to set up the environment, download data, train the model, and run the Gradio app. Clearly explain how to use command-line arguments for scripts like `train.py` and `predict.py`.
-### Virtual Environment(needed for gradio)
+# How to Run:
+**Virtual Environment(needed for gradio)**
 Set-up a virtual environment using
-'python -m venv pokeml'
-### Dependencies installation
+`python -m venv pokeml`
+**Dependencies installation**
 Install required libraries using
-'pip install -r requirements.txt' (from the root directory)
+`pip install -r requirements.txt` (from the root directory)
 Download dataset from the above website and save it at data/raw/pokemon_images
-### Training the model 
+**Training the model** 
 To train the model run(from root directory)
-'python scripts/train.py #argparse-arguments'
+`python scripts/train.py #argparse-arguments`
 The argparse arguments include
     1. --epochs: number of epochs to train the model for (default=10)
     2. --batch_size: the batch size for dataloader (default=64)
@@ -50,15 +49,13 @@ The argparse arguments include
     4. --activation: activation for convolution layers
     5. --save: set True to save the trained model at models/trained_model.pth
 After training a graph showing Test Acc, Val Acc, Test Loss, Val Loss is shown
-### Predicting PokéMon using trained model
+**Predicting PokéMon using trained model**
 [Note] : Only run this after saving the trained model
 To predict the model run(from root directory)
-'python scripts/predict.py --image_path IMAGE-PATH'
+`python scripts/predict.py --image_path IMAGE-PATH`
 IMAGE-PATH is required for model to predict the PokéMon
-### Predict via Interface (Gradio)
+**Predict via Interface (Gradio)**
 To predict the PokéMon by uploading image using an interface, run
-'python app.py'
+`python app.py`
 This will provide a local as well as an online link to the interface website. Simply upload the image and click Submit.
-![alt text](https://drive.google.com/file/d/1o8XZ8TajDnmg7TKoAv7XJQmc6FnHeVT1/view?usp=drive_link)
-
-Dependencies: A list of all required Python libraries (e.g., from `requirements.txt`).
+![Gradio Interface](gradio_demo.png)

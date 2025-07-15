@@ -63,7 +63,7 @@ def train_model(model=model,
                 loss_fn=loss_fn, 
                 optimizer=optimizer,
                 lr=args.lr,
-                save=False
+                save=args.save
                 ):
     train_losses=[] 
     val_losses=[] 
@@ -108,12 +108,13 @@ def train_model(model=model,
         val_losses.append(val_loss)
         val_accs.append(val_acc)
         print(f'Correct {val_correct} out of {len(val_loader.dataset)}')
-        print(f'\nEpoch {epoch+1}\nTrain_Loss= {train_loss:.4f}\nValidation Loss= {val_loss:.4f}\nValidation accuracy= {val_acc:.4f}\nTrain_accuracy= {train_acc:.4f} ')
+        print(f'\nEpoch {epoch+1}\nTrain_Loss= {train_loss:.4f}\nValidation Loss= {val_loss:.4f}\nValidation accuracy= {val_acc:.4f}\nTrain_accuracy= {train_acc:.4f}\n')
     if save:
         torch.save(model.state_dict(), ROOT_DIR/"models"/"trained_model.pth")
+        print('Saved the model at', Path(ROOT_DIR/"models"/"trained_model.pth"))
     
-    plt.title(f'Epochs {num_epochs} lr {lr} activation {activation}')
     plt.figure(figsize=(10,4))
+    plt.suptitle(f'Epochs={num_epochs} lr={lr} activation={args.activation}')
     plt.subplot(1,2,1)
     plt.plot(train_losses, label='Train Loss')
     plt.plot(val_losses, label='Val Loss')
