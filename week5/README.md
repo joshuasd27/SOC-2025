@@ -52,6 +52,7 @@ The argparse arguments include
 After training a graph showing Test Acc, Val Acc, Test Loss, Val Loss is shown  
 **Predicting PokéMon using trained model**  
 >**Note** : Only run this after saving the trained model  
+
 To predict the model run(from root directory)  
 `python scripts/predict.py --image_path IMAGE-PATH`  
 IMAGE-PATH is required for model to predict the PokéMon  
