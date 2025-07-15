@@ -1,38 +1,38 @@
-### "Week 5: Pokémon Image Classifier"  
+# "Week 5: Pokémon Image Classifier"  
   
-# Introduction: Briefly describe the project goal and what's implemented.  
+### Introduction: Briefly describe the project goal and what's implemented.  
 The goal of this project was to train a model which can classify 1st generation PokéMon.  
   
-# Dataset: Provide details about the dataset used, including where to download it (if not included in the repo) and its structure.  
+### Dataset: Provide details about the dataset used, including where to download it (if not included in the repo) and its structure.  
 The dataset contains images of PokéMon from 1st generation each in a folder of their respective names. There are around 25-50 images of each PokéMon. All of them with the PokéMon in the center.  
 The dataset can be downloaded via the following link  
 https://www.kaggle.com/datasets/lantian773030/pokemonclassification  
   
-# Data Preprocessing: Explain the steps taken to preprocess the images (e.g., resizing, normalization, augmentation techniques used).  
+### Data Preprocessing:  
 During preprocessing for training, the images are resized to 256x256, normalized to mean [0,0,0] and std. deviation [0.272, 0.272, 0.272].  
 The augmentations applied are ColorJitter, RandomRotation and RandomHorizontalFlip.  
   
-# Model Architecture:  
+### Model Architecture:  
 The architecture has 3 Convolution layers(3 -> 32, 32 ->64, 64 -> 128), each followed by a maxpool with ReLU as activation function.  
 The CNN has 1 hidden layer with 512 nodes and 50% dropout.  
   
-# Training Details:  
+### Training Details:  
 Loss Function used is CrossEntropyLoss and Optimizer used is Adam.  
 The model was trained for 30 epochs.  
 Batch size was 64 with 80% of dataset used for training.  
   
-# Key training metrics  
+### Key training metrics  
 [Train loss and accuracy](test1.png)  
   
 The model is saved in `week5/models` as `trained_model.pth` with only the state_dict instead of the entire model.  
   
-# Results:  
+### Results:  
 (to be updated)  
-# Gradio Frontend:  
+### Gradio Frontend:  
 Run app.py(gradio interface) using  
 `python app.py`  
   
-# How to Run:  
+### How to Run:  
 **Virtual Environment(needed for gradio)**  
 Set-up a virtual environment using  
 `python -m venv pokeml`  
