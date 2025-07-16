@@ -14,7 +14,7 @@ The augmentations applied are ColorJitter, RandomRotation and RandomHorizontalFl
   
 ### Model Architecture:  
 The architecture has 3 Convolution layers(3 -> 16, 16 ->32, 32 -> 64), each followed by a maxpool with ReLU as activation function.  
-The CNN has 2 hidden layers (64*32*32 -> 512, 512 -> 256) with 512 nodes and 50% dropout.  
+The CNN has 2 hidden layers (64x32x32 -> 512, 512 -> 256) with 512 nodes and 50% dropout.  
   
 ### Training Details:  
 Loss Function used is CrossEntropyLoss and Optimizer used is SGD.  
