@@ -15,6 +15,7 @@ def get_transforms():
         transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomRotation(degrees=10),
+        transforms.RandomCrop(size=(256,256)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[mean]*3, std=[std]*3)
     ])
