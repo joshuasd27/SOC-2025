@@ -27,7 +27,7 @@ Batch size was 64 with 80% of dataset used for training.
 The model is saved in `week5/models` as `trained_model.pth` with only the state_dict instead of the entire model.  
   
 ### Results:  
-The final test accuracy was around 59.45%  
+The final test accuracy was around 83.79%  
 As the number of images for per PokéMon was less the initial accuracy was low, adding BatchNorm in CNN architecture helped improve the accuracy by a lot.  
 
 ### Gradio Frontend:  
